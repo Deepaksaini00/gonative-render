@@ -68,3 +68,6 @@ Thumbs.db
 # ========================
 *.zip
 *.tar.gz
+
+
+backend/.env.example
