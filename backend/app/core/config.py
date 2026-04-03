@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     SECRET_KEY: str = "changeme-in-production"
     DATABASE_URL: str = "sqlite+aiosqlite:///./langlearn.db"
-    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000,https://gonative-render.vercel.app/,https://gonative-render-git-master-deeps-projects-bff95a11.vercel.app"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     ALGORITHM: str = "HS256"
 
