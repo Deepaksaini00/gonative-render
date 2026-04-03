@@ -2,8 +2,16 @@ import json
 import re
 import google.generativeai as genai
 from app.core.config import settings
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in .env or environment")
 
 genai.configure(api_key=settings.GEMINI_API_KEY)
+
 model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
 # model = genai.GenerativeModel("gemini-2.0-flash")
 
