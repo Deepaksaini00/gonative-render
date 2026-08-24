@@ -5,8 +5,8 @@ import {
   ArrowLeft, CheckCircle2, XCircle, ChevronRight,
   Trophy, Star, Loader2, RotateCcw, BookOpen, Zap
 } from 'lucide-react'
-import api from '@/lib/api'
-import type { QuizQuestion, QuizResult } from '@/types'
+import { api } from '@/lib/api'
+import type { QuizQuestion, QuizResult, Lesson } from '@/types'
 
 type Phase = 'loading' | 'quiz' | 'review' | 'results'
 
@@ -25,11 +25,11 @@ export default function QuizPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get(`/lessons/${id}/questions`),
-      api.get(`/lessons/${id}`)
+      api.GET('/api/lessons/{lesson_id}/questions', { params: { path: { lesson_id: Number(id) } } }),
+      api.GET('/api/lessons/{lesson_id}', { params: { path: { lesson_id: Number(id) } } }),
     ]).then(([qRes, lRes]) => {
-      setQuestions(qRes.data)
-      setLessonTitle(lRes.data.title)
+      if (qRes.data) setQuestions(qRes.data as QuizQuestion[])
+      if (lRes.data) setLessonTitle((lRes.data as Lesson).title)
       setPhase('quiz')
     }).catch(() => navigate('/dashboard'))
   }, [id, navigate])
@@ -56,13 +56,16 @@ export default function QuizPage() {
     setSubmitting(true)
     try {
       const timeTaken = Math.round((Date.now() - startTime.current) / 1000)
-      const { data } = await api.post('/quiz/submit', {
-        lesson_id: Number(id),
-        attempt_type: 'lesson',
-        answers: finalAnswers,
-        time_taken_seconds: timeTaken,
+      const { data, error } = await api.POST('/api/quiz/submit', {
+        body: {
+          lesson_id: Number(id),
+          attempt_type: 'lesson',
+          answers: finalAnswers,
+          time_taken_seconds: timeTaken,
+        },
       })
-      setResult(data)
+      if (error) throw error
+      setResult(data as QuizResult)
       setPhase('results')
     } catch (err) {
       console.error(err)

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { User } from '@/types'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface AuthState {
   user: User | null
@@ -23,7 +23,10 @@ export const useAuthStore = create<AuthState>()(
       login: async (email, password) => {
         set({ isLoading: true })
         try {
-          const { data } = await api.post('/api/auth/login', { email, password })
+          const { data, error } = await api.POST('/api/auth/login', {
+            body: { email, password },
+          })
+          if (error || !data) throw error ?? new Error('Login failed')
           localStorage.setItem('token', data.access_token)
           set({ user: data.user, token: data.access_token, isLoading: false })
         } catch (err) {
@@ -35,11 +38,16 @@ export const useAuthStore = create<AuthState>()(
       register: async (name, email, password) => {
         set({ isLoading: true })
         try {
-          const { data } = await api.post('/api/auth/register', {
-            name, email, password,
-            native_language: 'hindi',
-            target_language: 'english',
+          const { data, error } = await api.POST('/api/auth/register', {
+            body: {
+              name,
+              email,
+              password,
+              native_language: 'hindi',
+              target_language: 'english',
+            },
           })
+          if (error || !data) throw error ?? new Error('Registration failed')
           localStorage.setItem('token', data.access_token)
           set({ user: data.user, token: data.access_token, isLoading: false })
         } catch (err) {
@@ -55,7 +63,8 @@ export const useAuthStore = create<AuthState>()(
 
       refreshUser: async () => {
         try {
-          const { data } = await api.get('/api/auth/me')
+          const { data, error } = await api.GET('/api/auth/me')
+          if (error || !data) throw error
           set({ user: data })
         } catch {
           get().logout()

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Star, Flame, Trophy, CheckCircle2, Clock, TrendingUp, BookOpen } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 import type { Stats } from '@/types'
 import { xpToLevel } from '@/lib/utils'
 
@@ -11,7 +11,9 @@ export default function ProfilePage() {
   const [stats, setStats] = useState<Stats | null>(null)
 
   useEffect(() => {
-    api.get('/progress/stats').then(r => setStats(r.data)).catch(console.error)
+    api.GET('/api/progress/stats').then(r => {
+      if (r.data) setStats(r.data as Stats)
+    }).catch(console.error)
   }, [])
 
   const { level, progress, nextLevelXp } = xpToLevel(user?.total_xp || 0)

@@ -1,7 +1,23 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "LangLearn backend - AI-powered language learning API (Hindi -> English)"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.32.1",
+    "google-generativeai==0.8.3",
+    "pydantic==2.10.3",
+    "email-validator",
+    "pydantic-settings==2.7.0",
+    "sqlalchemy==2.0.36",
+    "aiosqlite==0.20.0",
+    "python-jose[cryptography]==3.3.0",
+    "passlib[bcrypt]==1.7.4",
+    "bcrypt==4.0.1",
+    "python-multipart==0.0.20",
+    "httpx==0.28.1",
+    "python-dotenv==1.0.1",
+    "greenlet==3.1.1",
+]

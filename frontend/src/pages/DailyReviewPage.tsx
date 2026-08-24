@@ -5,17 +5,25 @@ import {
   ArrowLeft, CheckCircle2, XCircle, ChevronRight,
   Sun, Loader2, RotateCcw, Zap, Star
 } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface ReviewQuestion {
   question_text: string
-  question_hindi: string
+  question_hindi: string | null
   question_type: string
   options: string[]
   correct_answer: string
   explanation: string
-  explanation_hindi: string
+  explanation_hindi: string | null
 }
+
+type ReviewResponse = { questions: ReviewQuestion[] }
+
+const loadReview = () =>
+  api.GET('/api/quiz/daily-review/full').then(({ data, error }) => {
+    if (error) throw error
+    return ((data as ReviewResponse | undefined)?.questions ?? []) as ReviewQuestion[]
+  })
 
 type Phase = 'loading' | 'quiz' | 'feedback' | 'done'
 
@@ -30,10 +38,11 @@ export default function DailyReviewPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    api.get('/quiz/daily-review/full')
-      .then(r => { setQuestions(r.data.questions); setPhase('quiz') })
+    loadReview()
+      .then(questions => { setQuestions(questions); setPhase('quiz') })
       .catch(err => {
-        setError(err.response?.data?.detail || 'No completed lessons found yet. Complete at least one lesson first!')
+        const detail = (err as { detail?: string })?.detail
+        setError(detail || 'No completed lessons found yet. Complete at least one lesson first!')
         setPhase('done')
       })
   }, [])
@@ -88,7 +97,7 @@ export default function DailyReviewPage() {
             )}
             <div className="flex gap-3">
               <button onClick={() => { setCurrent(0); setScore(0); setSelected(null); setShowFeedback(false); setPhase('loading');
-                api.get('/quiz/daily-review/full').then(r => { setQuestions(r.data.questions); setPhase('quiz') }) }}
+                loadReview().then(questions => { setQuestions(questions); setPhase('quiz') }).catch(() => { setPhase('done') }) }}
                 className="btn-secondary flex-1 flex items-center justify-center gap-2">
                 <RotateCcw className="w-4 h-4" /> Again
               </button>

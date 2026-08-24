@@ -1,25 +1,31 @@
-import axios from 'axios'
+import createClient, { type Middleware } from 'openapi-fetch'
+import type { paths } from '@/generated/api'
+import { env } from '@/lib/config'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '',
+const authMiddleware: Middleware = {
+  async onRequest({ request }) {
+    const token = localStorage.getItem('token')
+    if (token) {
+      request.headers.set('Authorization', `Bearer ${token}`)
+    }
+    return request
+  },
+  async onResponse({ response }) {
+    if (response.status === 401) {
+      localStorage.removeItem('token')
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
+      }
+    }
+    return response
+  },
+}
+
+export const api = createClient<paths>({
+  baseUrl: env.API_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+api.use(authMiddleware)
 
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-    }
-    return Promise.reject(err)
-  }
-)
-
-export default api
+export type { paths }

@@ -6,7 +6,7 @@ import {
   Volume2, Loader2, Send, Bot, User as UserIcon,
   ChevronDown, ChevronUp, Lightbulb, GraduationCap
 } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 import type { Lesson, ChatMessage } from '@/types'
 
 type Tab = 'learn' | 'chat'
@@ -25,7 +25,9 @@ export default function LessonPage() {
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    api.get(`/lessons/${id}`).then(r => { setLesson(r.data); setLoading(false) }).catch(() => navigate('/dashboard'))
+    api.GET('/api/lessons/{lesson_id}', { params: { path: { lesson_id: Number(id) } } })
+      .then(r => { setLesson(r.data as Lesson); setLoading(false) })
+      .catch(() => navigate('/dashboard'))
   }, [id, navigate])
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
@@ -37,11 +39,15 @@ export default function LessonPage() {
     setChatInput('')
     setChatLoading(true)
     try {
-      const { data } = await api.post('/chat', {
-        lesson_id: Number(id),
-        messages: [...messages, userMsg],
+      const { data, error } = await api.POST('/api/chat', {
+        body: {
+          lesson_id: Number(id),
+          messages: [...messages, userMsg],
+        },
       })
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      if (error) throw error
+      const reply = (data as { reply?: string } | undefined)?.reply
+      setMessages(prev => [...prev, { role: 'assistant', content: reply || 'Hmm, सीखते रहते हैं. Try again?' }])
     } catch { setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, kuch gadbad ho gayi. Please try again.' }]) }
     finally { setChatLoading(false) }
   }

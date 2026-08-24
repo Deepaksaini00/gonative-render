@@ -70,3 +70,7 @@ Thumbs.db
 *.tar.gz
 
 
+
+# Frontend / TypeScript
+frontend/src/generated/
+frontend/*.tsbuildinfo

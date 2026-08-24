@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookOpen, Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { getErrorMessage } from '@/lib/utils'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -20,8 +21,8 @@ export default function RegisterPage() {
     try {
       await register(name, email, password)
       navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Registration failed. Please try again.'))
     }
   }
 

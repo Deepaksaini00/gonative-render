@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookOpen, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { getErrorMessage } from '@/lib/utils'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,8 +19,8 @@ export default function LoginPage() {
     try {
       await login(email, password)
       navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please try again.')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Login failed. Please try again.'))
     }
   }
 

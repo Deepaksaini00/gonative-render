@@ -176,10 +176,12 @@ async def update_progress(
 
     progress = await get_user_progress(db, user_id, lesson_id)
     if not progress:
-        progress = UserProgress(user_id=user_id, lesson_id=lesson_id)
+        progress = UserProgress(
+            user_id=user_id, lesson_id=lesson_id, score=0.0, attempts=0, xp_earned=0
+        )
         db.add(progress)
 
-    progress.score = max(progress.score, score)
+    progress.score = max(progress.score or 0.0, score)
     progress.attempts += 1
     progress.last_attempted = datetime.now(timezone.utc)
 

@@ -6,7 +6,7 @@ import {
   Loader2, Sparkles, Lock, CheckCircle2, Clock, RefreshCw
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 import type { Lesson, Stats } from '@/types'
 import { getLevelLabel, getLevelColor, getStatusColor, getStatusLabel, xpToLevel } from '@/lib/utils'
 
@@ -22,11 +22,11 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     try {
       const [lessonsRes, statsRes] = await Promise.all([
-        api.get('/lessons'),
-        api.get('/progress/stats'),
+        api.GET('/api/lessons'),
+        api.GET('/api/progress/stats'),
       ])
-      setLessons(lessonsRes.data)
-      setStats(statsRes.data)
+      if (lessonsRes.data) setLessons(lessonsRes.data as Lesson[])
+      if (statsRes.data) setStats(statsRes.data as Stats)
     } catch (err) {
       console.error(err)
     } finally {
@@ -39,7 +39,7 @@ export default function DashboardPage() {
   const handleSeed = async () => {
     setSeeding(true)
     try {
-      await api.post('/lessons/seed')
+      await api.POST('/api/lessons/seed')
       await loadData()
       await refreshUser()
     } catch (err) { console.error(err) }

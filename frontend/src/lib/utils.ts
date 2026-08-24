@@ -50,3 +50,19 @@ export function xpToLevel(xp: number): { level: number; progress: number; nextLe
   const progress = next === current ? 100 : ((xp - current) / (next - current)) * 100
   return { level, progress: Math.min(100, Math.round(progress)), nextLevelXp: next - xp }
 }
+
+export function getErrorMessage(err: unknown, fallback: string): string {
+  const anyErr = err as {
+    detail?: unknown
+    error?: { detail?: unknown }
+    response?: { data?: { detail?: unknown } }
+    message?: string
+  }
+  const detail = anyErr?.detail ?? anyErr?.error?.detail ?? anyErr?.response?.data?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const first = detail[0] as { msg?: string } | undefined
+    if (first?.msg) return first.msg
+  }
+  return anyErr?.message || fallback
+}
